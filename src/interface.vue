@@ -38,6 +38,8 @@ import useFileHandler from './use-filehandler';
 import getTools from './get-tools';
 import getTranslations from './translations';
 import { wait } from './wait';
+import DragDrop from 'editorjs-drag-drop';
+import Undo from 'editorjs-undo';
 
 const props = withDefaults(
 	defineProps<{
@@ -48,6 +50,10 @@ const props = withDefaults(
 		bordered?: boolean;
 		placeholder?: string;
 		tools: string[];
+		alignmentTune: boolean;
+		dragDrop: boolean;
+		undo: boolean;
+		otherBlocksPackageName?: string;
 		folder?: string;
 		font: 'sans-serif' | 'monospace' | 'serif';
 	}>(),
@@ -58,6 +64,10 @@ const props = withDefaults(
 		value: () => null,
 		bordered: true,
 		tools: () => ['header', 'nestedlist', 'code', 'image', 'paragraph', 'delimiter', 'checklist', 'quote', 'underline'],
+		alignmentTune: () => true,
+		dragDrop: () => true,
+		undo: () => true,
+		otherBlocksPackageName: () => null,
 		font: 'sans-serif',
 	}
 );
@@ -78,23 +88,24 @@ const editorElement = ref<HTMLElement>();
 const haveFilesAccess = Boolean(collectionStore.getCollection('directus_files'));
 const isInternalChange = ref<boolean>(false);
 
-const tools = getTools(
-	{
-		addTokenToURL,
-		baseURL: api.defaults.baseURL,
-		setFileHandler,
-		setCurrentPreview,
-		getUploadFieldElement: () => uploaderComponentElement,
-		t: {
-			no_file_selected: t('no_file_selected'),
-		},
-	},
-	props.tools,
-	haveFilesAccess
-);
-
-onMounted(() => {
+onMounted(async () => {
 	const initialValue = getSanitizedValue(props.value);
+	const tools = await getTools(
+		{
+			addTokenToURL,
+			baseURL: api.defaults.baseURL,
+			setFileHandler,
+			setCurrentPreview,
+			getUploadFieldElement: () => uploaderComponentElement,
+			t: {
+				no_file_selected: t('no_file_selected'),
+			},
+		},
+		props.tools,
+		props.alignmentTune,
+		props.otherBlocksPackageName,
+		haveFilesAccess,
+	);
 
 	editorjsInstance.value = new EditorJS({
 		i18n: getTranslations(t),
@@ -108,6 +119,10 @@ onMounted(() => {
 		minHeight: 72,
 		onChange: (a, b) => emitValue(a, b),
 		tools: tools,
+		onReady: () => {
+			if (dragDrop) new DragDrop(editorjsInstance.value);
+			if (undo) new Undo(editorjsInstance.value);
+		},
 	});
 
 	if (props.autofocus) {

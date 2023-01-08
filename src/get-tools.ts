@@ -30,11 +30,13 @@ export type UploaderConfig = {
 	t: Record<string, string>;
 };
 
-export default function getTools(
+export default async function getTools(
 	uploaderConfig: UploaderConfig,
 	selection: Array<string>,
+	haveAlignmentTune: boolean,
+	otherBlocksPackageName: string | null,
 	haveFilesAccess: boolean
-): Record<string, object> {
+): Promise<Record<string, object>> {
 	const tools: Record<string, any> = {};
 	const fileRequiresTools = ['attaches', 'personality', 'image'];
 
@@ -107,9 +109,6 @@ export default function getTools(
 			class: ChecklistTool,
 			inlineToolbar: true,
 		},
-		simpleimage: {
-			class: SimpleImageTool,
-		},
 		image: {
 			class: ImageTool,
 			config: {
@@ -133,15 +132,21 @@ export default function getTools(
 		},
 	};
 
+	const otherBlocks = otherBlocksPackageName
+		? await import(otherBlocksPackageName!).catch((err) => {
+				throw err;
+		  })
+		: null;
 	for (const toolName of selection) {
 		if (!haveFilesAccess && fileRequiresTools.includes(toolName)) continue;
 
 		if (toolName in defaults) {
 			tools[toolName] = defaults[toolName];
-		}
+		} else if (otherBlocks && toolName in otherBlocks) tools[toolName] = otherBlocks[toolName];
 	}
 
-	if ('alignmentTune' in tools) {
+	if (haveAlignmentTune) {
+		tools.alignmentTune = defaults.alignmentTune;
 		if ('paragraph' in tools) {
 			tools.paragraph.tunes = ['alignmentTune'];
 		}

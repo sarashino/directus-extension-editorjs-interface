@@ -50,16 +50,38 @@ export default defineInterface({
 			},
 		},
 		{
+			field: 'otherBlocksPackageName',
+			name: 'other blocks package name',
+			meta: {
+				width: 'full',
+				interface: 'text-input',
+				options: {
+					trim: true,
+				},
+			},
+		},
+		{
 			field: 'tools',
 			name: '$t:interfaces.input-rich-text-html.toolbar',
 			type: 'json',
 			schema: {
-				default_value: ['header', 'nestedlist', 'code', 'image', 'paragraph', 'delimiter', 'checklist', 'quote', 'underline'],
+				default_value: [
+					'header',
+					'nestedlist',
+					'code',
+					'image',
+					'paragraph',
+					'delimiter',
+					'checklist',
+					'quote',
+					'underline',
+				],
 			},
 			meta: {
 				width: 'half',
 				interface: 'select-multiple-dropdown',
 				options: {
+					allowOther: true,
 					choices: [
 						{
 							value: 'header',
@@ -134,10 +156,6 @@ export default defineInterface({
 							text: 'Delimiter',
 						},
 						{
-							value: 'alignmentTune',
-							text: 'Alignment',
-						},
-						{
 							value: 'checklist',
 							text: 'Checklist',
 						},
@@ -151,6 +169,51 @@ export default defineInterface({
 						},
 					],
 				},
+			},
+		},
+		{
+			field: 'alignmentTune',
+			name: 'Align Tune',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+				options: {
+					label: 'Align Tune',
+				},
+			},
+			schema: {
+				default_value: true,
+			},
+		},
+		{
+			field: 'dragDrop',
+			name: 'Drag Drop',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+				options: {
+					label: 'Drag Drop',
+				},
+			},
+			schema: {
+				default_value: true,
+			},
+		},
+		{
+			field: 'undo',
+			name: 'Undo',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+				options: {
+					label: 'Undo',
+				},
+			},
+			schema: {
+				default_value: true,
 			},
 		},
 		{
